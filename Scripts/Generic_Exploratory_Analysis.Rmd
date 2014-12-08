@@ -1,0 +1,254 @@
+Exploratory Analysis
+========================================================
+
+### Reading in Data
+
+```{r,echo=FALSE}
+mistake<-""
+load(file=paste(mistake,'Model Data'))
+options(digits=2)
+dim(model.data)
+options(width=150)
+```
+
+### `r cat(mistake)`
+
+```{r}
+# prevalence
+x<-table(model.data$mistake.ind)
+prevalence<-x[2]/x[1]
+print(x);cat('prevalence:',prevalence)
+```
+
+### Charleson Scores
+
+```{r}
+# look at tables with medical mistakes
+prevalence.table<-function(mistake.indicator,chronic.count){
+  x<-table(mistake.indicator,chronic.count)
+  x<-cbind(x[1,],x[2,],10000*x[2,]/x[1,])
+	colnames(x)<-c("Uninfected","Infected","Cases per 10K")
+	x
+}
+prevalence.table(model.data$mistake.indicator,model.data$charleson)
+prevalence.table(model.data$mistake.indicator,model.data$exp.specialists)
+table(model.data$charleson,model.data$exp.specialists)
+
+aggregate(model.data$charleson~model.data$mistake.indicator,FUN=mean)
+aggregate(model.data$exp.specialists~model.data$mistake.indicator,FUN=mean)
+
+```
+
+### Making Visualizations of Chronic Counts and Mistakes
+
+```{r,fig.height=6}
+### Make Prevalence Plots
+make.3d<-function(cut1,cut2,str1,str2,str3,mistake.indicator){
+	x<-table(cut1,cut2,mistake.indicator)
+	x<-10000*prop.table(x,1:2)[,,2]
+	x.lab<-paste("Count of ",str1," Conditions")
+	y.lab<-paste("Count of ",str2," Conditions")
+	z.lab<-paste(str3," per 10,000")
+	title<-paste(str3," per 10,000 Patients \n vs. Diagnosis Counts for ", str1," and ",str2," Conditions")
+	a<-sort(unique(as.integer(as.character(cut1))))
+	b<-sort(unique(as.integer(as.character(cut2))))
+	persp(a,b,x,xlab=x.lab,ylab=y.lab, zlab=z.lab,zlim=c(0,45),theta=-45,phi=15,ticktype="detailed",ltheta = 90, lphi = 0,shade = .5,col="lightblue",main=title)
+}
+
+make.3d.no.psych<-function(cut1,cut2,str1,str2,str3,mistake.indicator){
+	x<-table(cut1,cut2,mistake.indicator,chem.psych)
+	x<-x[,,,1]
+	x<-10000*prop.table(x,1:2)[,,2]
+	x.lab<-paste("Count of ",str1," Conditions")
+	y.lab<-paste("Count of ",str2," Conditions")
+	z.lab<-paste(str3," per 10,000")
+	title<-paste("Rates of ",str3," per 10,000\n vs. Diagnosis Counts for ", str1," and ",str2," Conditions")
+	a<-sort(unique(as.integer(as.character(cut1))))
+	b<-sort(unique(as.integer(as.character(cut2))))
+	persp(a,b,x,xlab=x.lab,ylab=y.lab, zlab=z.lab,zlim=c(0,45),theta=-45,phi=15,ticktype="detailed",ltheta = 90, lphi = 0,shade = .5,col="lightblue",main=title)
+}
+
+make.all.3d<-function(mistake.indicator){
+	par(mfrow=c(2,3))
+	make.3d(heart.cut,endo.cut,"Heart","Endocrine","Catheter Infections",mistake.indicator)
+	make.3d(heart.cut,pulm.cut,"Heart","Pulmonary","Catheter Infections",mistake.indicator)
+	make.3d(heart.cut,ment.cut,"Heart","Mental","Catheter Infections",mistake.indicator)
+	make.3d(pulm.cut,endo.cut,"Pulmonary","Endocrine","Catheter Infections",mistake.indicator)
+	make.3d(pulm.cut,ment.cut,"Pulmonary","Mental","Catheter Infections",mistake.indicator)
+	make.3d(endo.cut,ment.cut,"Endocrine","Mental","Catheter Infections",mistake.indicator)
+}
+
+make.all.no.psych<-function(mistake.indicator){
+	par(mfrow=c(2,3))
+	make.3d.no.psych(heart.cut,endo.cut,"Heart","Endocrine","Catheter Infections",mistake.indicator)
+	make.3d.no.psych(heart.cut,pulm.cut,"Heart","Pulmonary","Catheter Infections",mistake.indicator)
+	make.3d.no.psych(heart.cut,ment.cut,"Heart","Mental","Catheter Infections",mistake.indicator)
+	make.3d.no.psych(pulm.cut,endo.cut,"Pulmonary","Endocrine","Catheter Infections",mistake.indicator)
+	make.3d.no.psych(pulm.cut,ment.cut,"Pulmonary","Mental","Catheter Infections",mistake.indicator)
+	make.3d.no.psych(endo.cut,ment.cut,"Endocrine","Mental","Catheter Infections",mistake.indicator)
+}
+
+make.all.3d(model.data$mistake.indicator)
+```
+
+
+### Exploratory Analysis
+
+Looking at rates of infection for demographic variables:
+
+```{r}
+# this function creates summary tables for these demographics and catheter infections
+dem.mistake.table<-function(mistake.indicator){
+	x<-table(sex1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))
+	cat("-----------------------------------------------------\n")
+	x<-table(race1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))
+	cat("-----------------------------------------------------\n")
+	x<-table(eth1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))
+	cat("-----------------------------------------------------\n")
+	x<-table(age1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))
+}
+dem.mistake.table(model.data$mistake.indicator)
+```
+
+Looking at rates of infection for medical care/hospital variables.
+
+```{r}
+# creates factors for medical variables
+typ_care1<-as.factor(model.data$typ_care)
+levels(typ_care1)<-c("Blank","Acute","Skilled Nursing","Ment Care", "Chem Recovery", "Phys Rehab")
+typ_care1<-as.factor(model.data$typ_care)
+levels(typ_care1)<-c("Blank","Acute","Skilled Nursing","Ment Care", "Chem Recovery", "Phys Rehab")
+adm_qtr1<-as.factor(model.data$adm_qtr)
+levels(adm_qtr1)<-c("Jan-March","Apr-Jun","July-Sep","Oct-Dec")
+adm_typ1<-as.factor(model.data$adm_typ)
+levels(adm_typ1)<-c("Blank","Scheduled","Unscheduled","Infant","Unknown")
+los1<-cut(model.data$los, breaks=c(0,5,10,15,20,25,10000),include.lowest=T,ordered_result=T)
+disp1<-as.factor(model.data$disp)
+pay_cat1<-as.factor(model.data$pay_cat)
+
+# make indicators for type of care
+acute<-ifelse(typ_care1=="Acute",1,0)
+skill.nurse<-ifelse(typ_care1=="Skilled Nursing",1,0)
+phys.re<-ifelse(typ_care1=="Phys Rehab",1,0)
+psych.care<-ifelse(typ_care1=="Psych Care",1,0)
+chem.re<-ifelse(typ_care1=="Chem Recovery",1,0)
+chem.psych<-psych.care|chem.re
+
+# this function creates summary tables for these medical variables and catheter infections
+med.mistake.table<-function(mistake.indicator){
+	cat("Type of Care\n")
+	x<-table(typ_care1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))
+	cat("-----------------------------------------------------\nAdmission Quarter\n")
+	x<-table(adm_qtr1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))	
+	cat("-----------------------------------------------------\nLength of Stay\n")
+	x<-table(los1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))	
+	cat("-----------------------------------------------------\nAdmission Type\n")
+	x<-table(adm_typ1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))	
+	cat("-----------------------------------------------------\nDisposition\n")
+	x<-table(disp1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))	
+	cat("-----------------------------------------------------\nPay Category\n")
+	x<-table(pay_cat1, mistake.indicator)
+	print(cbind(x, Per.10K=10000*prop.table(x,1)[,2]))	
+}
+med.mistake.table(model.data$mistake.indicator)
+```
+
+### Analyzing Missing Data
+
+```{r}
+#### Creates indicators for patients who have missing values
+age.miss<-ifelse(is.na(model.data$age1),"Censored",ifelse(model.data$agecat20==0,"Missing","Complete"))
+race.miss<-ifelse(is.na(model.data$race1),"Censored",ifelse(model.data$race %in% c(0,6),"Missing","Complete"))
+eth.miss<-ifelse(is.na(model.data$eth1),"Censored",ifelse(model.data$ethncty %in% c(0,3),"Missing","Complete"))
+sex.miss<-ifelse(is.na(model.data$sex1),"Censored",ifelse(model.data$sex==4,"Missing","Complete"))
+oshpd.miss<-ifelse(is.na(model.data$hospital_id),"Missing","Complete")
+
+# this function makes table of mean and sd of counts for censored and non-censored patients
+missing.sickness<-function(cnt,miss){
+  Average <- c(mean(cnt[miss=="Complete"]), mean(cnt[miss=="Censored"]))
+  StandardDeviation <- c(sd(cnt[miss=="Complete"]),sd(cnt[miss=="Censored"]))
+  x<-rbind(Average,StandardDeviation)
+  colnames(x)<-c("Complete","Censored")
+  x
+}
+
+# looking at chronic conditions and missingness of demographic variables
+miss.dem.chronic.table<-function(count){
+	cat("age.miss vs. all.counts\n")
+	print(missing.sickness(count,age.miss))
+	cat("-----------------------------------\n")
+	cat("race.miss vs. all.counts\n")
+	print(missing.sickness(count,race.miss))
+	cat("-----------------------------------\n")
+	cat("eth.miss vs. all.counts\n")
+	print(missing.sickness(count, eth.miss))
+	cat("-----------------------------------\n")
+	cat("sex.miss vs. all.counts\n")
+	print(missing.sickness(count, sex.miss))
+}
+miss.dem.chronic.table(all.cnts)
+miss.dem.chronic.table(unique.cat)
+
+# Looking at missingness of demographics and catheter infections
+miss.dem.mistake.table<-function(indicator){
+	cat("Missing Gender\n")
+	print(table(sex.miss))
+	x<-table(indicator,sex.miss)
+	cat("\nCases per 10K\n")
+	print(10000*prop.table(x,2)[2,])
+	cat("-----------------------------------\nMissing Age\n")
+	print(table(age.miss))
+	x<-table(indicator,age.miss)
+	cat("\nCases per 10K\n")
+	print(10000*prop.table(x,2)[2,])
+	cat("-----------------------------------\nMissing Ethnicity\n")
+	print(table(eth.miss))
+	x<-table(indicator,eth.miss)
+	cat("\nCases per 10K\n")
+	print(10000*prop.table(x,2)[2,])
+	cat("-----------------------------------\nMissing Race\n")
+	print(table(race.miss))
+	x<-table(indicator,race.miss)
+	cat("\nCases per 10K\n")
+	print(10000*prop.table(x,2)[2,])
+	cat("-----------------------------------\nMissing Hospital ID\n")
+	print(table(oshpd.miss))
+	x<-table(indicator,oshpd.miss)
+	cat("\nCases per 10K\n")
+	print(10000*prop.table(x,2)[2,])
+}
+miss.dem.mistake.table(mistake.indicator)
+```
+
+### Initial Modeling
+
+```{r}
+#### Models Building Function
+make.model<-function(equation){
+	x<-glm(equation,family="binomial")
+	Coefficients<-exp(x$coefficients[-1])
+	P.Value<-summary(x)$coefficients[-1, 4]
+	cat("--------------------------------------------------------------------------\n")
+	print(equation)
+	cat("Baseline Odds:", exp(x$coefficients[1]),"\n")
+	print(cbind(Coefficients,P.Value))
+	cat("--------------------------------------------------------------------------\n")
+}
+
+#make.model(mistake.ind~heart.ind+endo.ind+ment.ind+pulm.ind)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt+psych.care)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt+chem.re)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt+unique.cat)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt+unique.cat)
+#make.model(mistake.ind~heart.cnt+endo.cnt+ment.cnt+pulm.cnt+black+nat.amer+asian.pi+other.race+hispanic+male)
+```
