@@ -8,7 +8,7 @@
 ######### Pay Category, Pay Type, Length of Stay, Type of Care, and Admissions Type
 #### The file is saved as Clean Raw Data in the data folder.
 
-load("~/shared/Data/Raw_Data")
+load("~/shared/Data/Full_Data/Raw_Data.obj")
 
 #Hospital ID
 oshpd<-raw.data$oshpd_id
@@ -115,7 +115,7 @@ hiv.cnt<-make.count(diag.data,hiv) #
   
 ############################################################# Create Expected Number of Specialists
 # Read in chronic indicators file
-chronic.ind<-read.csv(file='~/shared/ChronicCategoryIndexNoHeader.csv', header=F, stringsAsFactors=FALSE)
+chronic.ind<-read.csv(file='~/shared/Scripts/Appendices/Chronic_Category_Index_No_Header.csv', header=F, stringsAsFactors=FALSE)
 
 # Sort out codes for each chronic category
 heart.codes<-chronic.ind[chronic.ind[,3]==1 & chronic.ind[,4]==7,1]
@@ -253,5 +253,5 @@ levels(pay_type1)<-c("NA","Managed Care MCOHS","Managed Care Other","Traditional
 model.data<-data.frame(oshpd, charleson, exp.specialists, sex1, race1, eth1, age1,
                        obj.mistake, cath.mistake, bed.mistake,
                        typ_care1, adm_typ1, los, pay_cat1, pay_type1)
-save(model.data,file = '~/shared/Data/Clean_Data.obj')
+save(model.data,file = '~/shared/Data/Full_Data/Clean_Data.obj')
 rm(list=ls())

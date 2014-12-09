@@ -9,7 +9,7 @@ library(foreign)
 
 year<-rep(as.character(2003:2011),each=3)
 extension<-rep(c("_LA_base.dta","_North_base.dta","_South_base.dta"),times=9)
-path<-"~/shared/FullDataset/"
+path<-"~/shared/Data/Original_Data/"
 files<-paste(path,year,extension,sep="")
 
 # 2003-2007 have the same column names, so we can rbind them
@@ -21,7 +21,7 @@ for(name in files[1:15]){
   raw.data<-rbind(raw.data,dta)
   n<-n+1
 }
-save(raw.data,file='~/shared/Data/Raw Data 03 07')
+save(raw.data,file='~/shared/Data/Full_Data/Raw_Data_03_07.obj')
 # This file is now saved as Raw Data 03 07
 
 # Same for 2008-2011
@@ -32,7 +32,7 @@ for(name in files[16:27]){
   raw.data2<-rbind(raw.data2,dta)
   n<-n+1
 }
-save(raw.data2,file='~/shared/Data/Raw Data 08 11')
+save(raw.data2,file='~/shared/Data/Full_Data/Raw_Data_08_11.obj')
 
 # now we will take the extra columns out of 2008-2011 and save them
 extra2<-c("cat_code","epoa1","epoa2","epoa3","epoa4","epoa_p","grouper","msdrg","sev_code")
@@ -51,4 +51,4 @@ colnames(raw.data)<-colnames(raw.data2) # first we make the column names consist
 raw.data<-rbind(raw.data,raw.data2) # then we rbind them
 raw.data$drg<-c(extra.data1,extra.data2) # add the drg variable back in
 
-save(raw.data,file='~/shared/Data/Raw Data')
+save(raw.data,file='~/shared/Data/Full_Data/Raw_Data.obj')

@@ -13,7 +13,7 @@
     # Type of Hospital (Teaching, Non-Profit, Profit)
   # County/Zip
 
-load("~/shared/Data/Object Model Data")
+load("~/shared/Data/Object_Data.obj")
 colnames(model.data)
 
 ################################################

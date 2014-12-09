@@ -53,10 +53,10 @@ exclude<-ifelse((raw.data$odiag24 %in% obj.codes)&raw.data$opoa24=="Y",1,exclude
 rm(raw.data) #erase raw data to save memory
 rm(diag.data)
 
-save(exclude,file = paste('~/shared/Data/',mistake,' Exclusion',sep=""))
-# there should now be a file called Object Exclusion in the ~shared/Data folder.
+save(exclude,file = paste('~/shared/Data/',mistake,'_Exclusion.obj',sep=""))
+# there should now be a file called Object_Exclusion.obj in the ~shared/Data folder.
 
-load("~/shared/Data/Clean Raw Data")
+load("~/shared/Data/Full_Data/Clean_Data.obj")
 model.data <- model.data[exclude==0,]
-save(model.data,file="~/shared/Data/Object Model Data")
+save(model.data,file="~/shared/Data/Object_Data.obj")
 rm(model.data)

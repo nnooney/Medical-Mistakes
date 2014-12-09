@@ -4,11 +4,11 @@
 
 mistake<-"Bedsore"
 
-load("~/shared/Data/raw.data2")
+load("~/shared/Data/Full_Data/Raw_Data.obj")
 #there should now be a huge data set in the global environment called model.data
 
 ###########################################################################################
-source(file='~/shared/Scripts/Appendix Codes.R')
+source(file='~/shared/Scripts/Appendices/Appendix_Codes.R')
 ###########################################################################################
 
 exclude<-rep(0,length=nrow(raw.data)) # make exclusion variable

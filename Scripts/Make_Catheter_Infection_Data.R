@@ -2,13 +2,13 @@
 #### infections. This file sources code from Appendix Codes.R and Generic Clean Data Subset.R 
 #### and holds additional exclusion criteria, specific for catheter infections.
 
-mistake<-"Catheter Infection"
+mistake<-"Catheter_Infection"
 
-load("~/shared/Data/Raw Data")
+load("~/shared/Data/Full_Data/Raw_Data.obj")
 #there should now be a huge data set in the global environment called raw.data
   
 ###########################################################################################
-source(file='~/shared/Scripts/Appendix Codes.R')
+source(file='~/shared/Scripts/Appendices/Appendix_Codes.R')
 ###########################################################################################
 
 exclude<-rep(0,length=nrow(raw.data)) # make exclusion variable
@@ -57,16 +57,12 @@ exclude<-ifelse((raw.data$0diag24 %in% cath.codes)&opoa24=="Y",1,exclude)
 
 data.subset<-raw.data[exclude==0,] # create data subset
 rm(raw.data) #erase raw data to save memory
+rm(diag.data)
 
-save(data.subset,paste('~/shared/Data/'mistake,' Data Subset',sep=""))
+save(exclude,file = paste('~/shared/Data/',mistake,'_Exclusion.obj',sep=""))
+# there should now be a file called Object_Exclusion.obj in the ~shared/Data folder.
 
-# Tests patients for catheter infections
-mistake.test<-function(patient){
-  codes<-c("99662","9993","99931","99932") # catheter infection codes
-  any(is.element(codes,patient))
-}
-
-###########################################################################################
-source(file='~/shared/Scripts/Generic Clean Data Subset.R')
-###########################################################################################
-# there should now be a file called Catheter Infection Model Data in the ~shared/Data folder.
+load("~/shared/Data/Full_Data/Clean_Data.obj")
+model.data <- model.data[exclude==0,]
+save(model.data,file="~/shared/Data/Catheter_Infection_Data.obj")
+rm(model.data)
